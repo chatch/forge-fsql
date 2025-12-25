@@ -26,7 +26,7 @@ export class ForgeClient {
     const startTime = Date.now();
 
     // Ensure SQL ends with a semicolon
-    const finalSql = sql.trim().endsWith(';') ? sql : `${sql};`;
+    const finalSql = sql.trim().endsWith(";") ? sql : `${sql};`;
 
     try {
       const controller = new AbortController();

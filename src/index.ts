@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import { ForgeClient } from "./client";
 import { ResultFormatter } from "./formatter";
 import { History } from "./history";
-import { parseCommand, specialCommands } from "./commands";
+import { parseCommand } from "./commands";
 
 dotenv.config();
 
