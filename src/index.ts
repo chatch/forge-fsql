@@ -8,6 +8,9 @@ import { parseCommand, specialCommands } from "./commands";
 
 dotenv.config();
 
+const getPrimaryPrompt = () => chalk.green("fsql> ");
+const getMultilinePrompt = () => chalk.green("      ...> ");
+
 interface CliConfig {
   url?: string;
 }
@@ -39,7 +42,7 @@ class ForgeSqlCli {
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: chalk.green("forge-sql> "),
+      prompt: getPrimaryPrompt(),
       history: this.history.getAll().reverse(),
       historySize: 1000,
     });
@@ -57,7 +60,7 @@ class ForgeSqlCli {
         console.log("\n" + chalk.yellow("Multi-line input cancelled"));
         this.multilineBuffer = "";
         this.isMultiline = false;
-        this.rl.setPrompt(chalk.green("forge-sql> "));
+        this.rl.setPrompt(getPrimaryPrompt());
       } else {
         console.log("\n" + chalk.gray("(Use .exit, exit, or Ctrl+D to quit)"));
       }
@@ -84,7 +87,7 @@ class ForgeSqlCli {
     if (!this.isMultiline && !input.endsWith(";") && !input.startsWith(".")) {
       this.isMultiline = true;
       this.multilineBuffer = input;
-      this.rl.setPrompt(chalk.green("      ...> "));
+      this.rl.setPrompt(getMultilinePrompt());
       this.rl.prompt();
       return;
     }
@@ -97,7 +100,7 @@ class ForgeSqlCli {
         const fullSql = this.multilineBuffer;
         this.multilineBuffer = "";
         this.isMultiline = false;
-        this.rl.setPrompt(chalk.green("forge-sql> "));
+        this.rl.setPrompt(getPrimaryPrompt());
 
         await this.executeCommand(fullSql);
       } else {
@@ -145,7 +148,7 @@ class ForgeSqlCli {
   }
 
   async start(): Promise<void> {
-    console.log(chalk.bold.blue("Forge SQL CLI"));
+    console.log(chalk.bold.blue("Forge FSQL CLI"));
     console.log(chalk.gray("Type .help for commands, exit to quit"));
     console.log(chalk.gray("=".repeat(50)));
 

@@ -1,4 +1,4 @@
-# Forge SQL CLI
+# Forge FSQL CLI
 
 Interactive command-line interface for querying Atlassian Forge SQL databases via web triggers.
 
@@ -16,7 +16,7 @@ Interactive command-line interface for querying Atlassian Forge SQL databases vi
 ### In Your Forge Project
 
 ```bash
-pnpm add -D forge-sql-cli
+pnpm add -D forge-fsql
 ```
 
 Add to your `package.json` scripts:
@@ -24,7 +24,7 @@ Add to your `package.json` scripts:
 ```json
 {
   "scripts": {
-    "sql": "forge-sql"
+    "sql": "fsql"
   }
 }
 ```
@@ -32,7 +32,7 @@ Add to your `package.json` scripts:
 ### Global Installation
 
 ```bash
-pnpm add -g forge-sql-cli
+pnpm add -g forge-fsql
 ```
 
 ## Configuration
@@ -46,7 +46,7 @@ FORGE_SQL_URL=https://your-trigger-url.forge.atlassian.com/sql
 Or pass via command line:
 
 ```bash
-forge-sql --url https://your-trigger-url.com
+fsql --url https://your-trigger-url.com
 ```
 
 ## Usage
@@ -56,5 +56,5 @@ forge-sql --url https://your-trigger-url.com
 pnpm sql
 
 # If installed globally
-forge-sql
+fsql
 ```
