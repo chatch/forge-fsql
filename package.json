@@ -1,6 +1,6 @@
 {
   "name": "forge-fsql",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "Interactive SQL CLI for Atlassian Forge SQL via web triggers",
   "main": "dist/cjs/index.js",
@@ -12,9 +12,14 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/index.d.ts"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
     }
   },
   "files": [

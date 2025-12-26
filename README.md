@@ -15,8 +15,17 @@ Interactive command-line interface for querying Atlassian Forge SQL databases vi
 
 ### In Your Forge Project
 
-```bash
-pnpm add -D forge-fsql
+```sh
+npm install -D forge-fsql
+
+# add webtrigger to manifest.yml and a wrapper module for the corresponding function
+node_modules/.bin/fsql-setup
+
+# deploy with the webtrigger
+forge deploy
+
+# get trigger url:
+forge webtrigger create --product Confluence --site <site>.atlassian.net --functionKey execute-sql
 ```
 
 Add to your `package.json` scripts:
@@ -24,37 +33,20 @@ Add to your `package.json` scripts:
 ```json
 {
   "scripts": {
-    "sql": "fsql"
+    "fsql": "fsql"
   }
 }
 ```
 
-### Global Installation
+## Run
 
-```bash
-pnpm add -g forge-fsql
-```
+```sh
+# set URL using value from previous step
+export FORGE_SQL_URL=https://your-trigger-url.com
 
-## Configuration
+# run fsql!
+npm run fsql
 
-Create a `.env` file in your project root:
-
-```bash
-FORGE_SQL_URL=https://your-trigger-url.forge.atlassian.com/sql
-```
-
-Or pass via command line:
-
-```bash
-fsql --url https://your-trigger-url.com
-```
-
-## Usage
-
-```bash
-# If installed in project
-pnpm sql
-
-# If installed globally
-fsql
+# or
+npm run fsql --url https://your-trigger-url.com
 ```
