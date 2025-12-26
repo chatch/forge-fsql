@@ -7,8 +7,8 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "fsql": "./bin/fsql",
-    "fsql-setup": "./bin/setup"
+    "fsql": "bin/fsql",
+    "fsql-setup": "bin/setup"
   },
   "exports": {
     ".": {
