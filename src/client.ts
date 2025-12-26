@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 export interface SqlResult {
   rows?: any[];
   affectedRows?: number;
