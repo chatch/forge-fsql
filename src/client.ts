@@ -55,7 +55,7 @@ export class ForgeClient {
         };
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as Record<string, any>;
       const elapsed = Date.now() - startTime;
 
       return {
