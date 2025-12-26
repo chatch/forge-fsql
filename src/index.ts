@@ -1,10 +1,10 @@
 import * as readline from "readline";
 import chalk from "chalk";
 import * as dotenv from "dotenv";
-import { ForgeClient } from "./client";
-import { ResultFormatter } from "./formatter";
-import { History } from "./history";
-import { parseCommand } from "./commands";
+import { ForgeClient } from "./client.js";
+import { ResultFormatter } from "./formatter.js";
+import { History } from "./history.js";
+import { parseCommand } from "./commands.js";
 
 dotenv.config();
 

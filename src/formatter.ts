@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import Table from "cli-table3";
-import { SqlResult } from "./client";
+import { SqlResult } from "./client.js";
 
 export class ResultFormatter {
   static formatTable(rows: any[]): string {

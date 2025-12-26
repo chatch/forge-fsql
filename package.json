@@ -3,10 +3,19 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Interactive SQL CLI for Atlassian Forge SQL via web triggers",
-  "main": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "fsql": "./bin/fsql",
     "fsql-setup": "./bin/setup"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "files": [
     "dist",
@@ -14,10 +23,10 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "fsql": "fsql",
+    "fsql": "node ./bin/fsql",
     "lint": "pnpm lint:eslint && pnpm lint:prettier",
     "lint:eslint": "eslint '**/*.{ts,tsx,js,jsx}' --ignore-pattern '**/eslint.config.js'",
     "lint:prettier": "prettier '**/*.{ts,tsx,js,jsx,json,md,yaml,yml}' --check || echo '⚠️  Warning: Prettier formatting issues found. Run \"pnpm fixstyle\" to fix them.'",

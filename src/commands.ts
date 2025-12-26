@@ -1,5 +1,5 @@
-import { ForgeClient } from "./client";
-import { ResultFormatter } from "./formatter";
+import { ForgeClient } from "./client.js";
+import { ResultFormatter } from "./formatter.js";
 import chalk from "chalk";
 
 export interface Command {
