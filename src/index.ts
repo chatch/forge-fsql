@@ -1,21 +1,21 @@
 import * as readline from "readline";
 import chalk from "chalk";
-import * as dotenv from "dotenv";
 import { ForgeClient } from "./client.js";
 import { ResultFormatter } from "./formatter.js";
 import { History } from "./history.js";
 import { parseCommand } from "./commands.js";
 
-dotenv.config();
-
-const getPrimaryPrompt = () => chalk.green("fsql> ");
-const getMultilinePrompt = () => chalk.green("      ...> ");
+export { ForgeClient } from "./client.js";
+export { executeSql } from "./execute-sql.js";
 
 interface CliConfig {
   url?: string;
 }
 
-class ForgeSqlCli {
+const getPrimaryPrompt = () => chalk.green("fsql> ");
+const getMultilinePrompt = () => chalk.green("      ...> ");
+
+export class ForgeSqlCli {
   private client: ForgeClient;
   private rl: readline.Interface;
   private history: History;
@@ -167,17 +167,3 @@ class ForgeSqlCli {
     this.rl.prompt();
   }
 }
-
-// Parse command line arguments
-const args = process.argv.slice(2);
-const config: CliConfig = {};
-
-for (let i = 0; i < args.length; i++) {
-  if (args[i] === "--url" && args[i + 1]) {
-    config.url = args[i + 1];
-    i++;
-  }
-}
-
-const cli = new ForgeSqlCli(config);
-cli.start();
