@@ -2,6 +2,10 @@
 
 Interactive command-line interface for querying Atlassian Forge SQL databases via web triggers.
 
+## Demo
+
+![demo](demo-usage.gif)
+
 ## Features
 
 - 🎨 Table formatting with colors
