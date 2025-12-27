@@ -1,6 +1,6 @@
 # Forge FSQL CLI
 
-Interactive command-line interface for querying Atlassian Forge SQL databases via web triggers.
+Interactive CLI for querying Atlassian Forge SQL databases via web triggers.
 
 ## Demo
 
