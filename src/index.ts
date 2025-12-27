@@ -23,10 +23,10 @@ export class ForgeSqlCli {
   private isMultiline: boolean = false;
 
   constructor(config: CliConfig) {
-    const url = config.url || process.env.FORGE_SQL_URL;
+    const url = config.url || process.env.FORGE_SQL_WEBTRIGGER;
 
     if (!url) {
-      console.error(chalk.red("Error: FORGE_SQL_URL not configured"));
+      console.error(chalk.red("Error: FORGE_SQL_WEBTRIGGER not configured"));
       console.error(
         chalk.yellow("Set it via environment variable or .env file"),
       );
@@ -160,7 +160,9 @@ export class ForgeSqlCli {
       console.log(chalk.green("✓ Connected"));
     } else {
       console.log(chalk.red("✗ Connection failed"));
-      console.log(chalk.yellow("Check your FORGE_SQL_URL configuration"));
+      console.log(
+        chalk.yellow("Check your FORGE_SQL_WEBTRIGGER configuration"),
+      );
     }
 
     console.log("");

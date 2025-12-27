@@ -363,7 +363,7 @@ async function main() {
         }
       }
     }
-  } catch (e) {
+  } catch {
     // Ignore errors in auto-detection
   }
 
@@ -433,14 +433,13 @@ function updateEnv(url) {
   let envContent = "";
   if (fs.existsSync(envPath)) {
     envContent = fs.readFileSync(envPath, "utf8");
-    if (!envContent.endsWith("\n")) {
+    if (!envContent.endsWith("\n") && envContent.length > 0) {
       envContent += "\n";
     }
   }
 
   // Check if already exists
   if (envContent.includes("FORGE_SQL_WEBTRIGGER=")) {
-    // Replace
     envContent = envContent.replace(
       /FORGE_SQL_WEBTRIGGER=.*(\n|$)/,
       `${envVar}\n`,

@@ -4,12 +4,12 @@ Interactive command-line interface for querying Atlassian Forge SQL databases vi
 
 ## Features
 
-- 🎨 Beautiful table formatting with colors
-- 📝 Multi-line SQL support
-- ⌨️ Command history (↑/↓ arrows)
+- 🎨 Table formatting with colors
 - ⚡ Special commands (.tables, .describe, .schema)
-- ⏱️ Query timing
+- ⌨️ Command history (↑/↓ arrows)
 - 💾 Persistent history across sessions
+- ⏱️ Query timing
+- 📝 Multi-line SQL support
 
 ## Installation
 
@@ -18,35 +18,19 @@ Interactive command-line interface for querying Atlassian Forge SQL databases vi
 ```sh
 npm install -g forge-fsql
 
-# adds webtrigger to manifest.yml and a wrapper module for the corresponding function
 fsql-setup
-
-# deploy with the webtrigger
-forge deploy
-
-# get trigger url:
-forge webtrigger create --product Confluence --site <site>.atlassian.net --functionKey execute-sql
 ```
 
-Add to your `package.json` scripts:
+Notes:
 
-```json
-{
-  "scripts": {
-    "fsql": "fsql"
-  }
-}
-```
+- creates a webtrigger in your manifest.yml
+- creates a module at src/fsql.ts for the webtrigger function
+- deploys the project with the new manifest
+- creates the webtrigger with `forge webtrigger create`
+- adds the webtrigger URL to a FORGE_SQL_WEBTRIGGER environment variable in .env
 
 ## Run
 
 ```sh
-# set URL using value from previous step
-export FORGE_SQL_URL=https://your-trigger-url.com
-
-# run fsql!
-npm run fsql
-
-# or
-npm run fsql --url https://your-trigger-url.com
+fsql
 ```
