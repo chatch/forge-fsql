@@ -1,14 +1,14 @@
 {
   "name": "forge-fsql",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "type": "module",
   "description": "Interactive SQL CLI for Atlassian Forge SQL via web triggers",
   "main": "dist/cjs/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "fsql": "bin/fsql",
-    "fsql-setup": "bin/setup"
+    "fsql": "bin/fsql.js",
+    "fsql-setup": "bin/setup.js"
   },
   "exports": {
     ".": {
@@ -25,13 +25,14 @@
   "files": [
     "dist",
     "bin",
+    "templates",
     "README.md"
   ],
   "scripts": {
     "build": "tsc && tsc -p tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "fsql": "node ./bin/fsql",
+    "fsql": "node ./bin/fsql.js",
     "lint": "pnpm lint:eslint && pnpm lint:prettier",
     "lint:eslint": "eslint '**/*.{ts,tsx,js,jsx}' --ignore-pattern '**/eslint.config.js'",
     "lint:prettier": "prettier '**/*.{ts,tsx,js,jsx,json,md,yaml,yml}' --check || echo '⚠️  Warning: Prettier formatting issues found. Run \"pnpm fixstyle\" to fix them.'",
@@ -60,6 +61,8 @@
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.3",
     "dotenv": "^16.0.3",
+    "ora": "^9.0.0",
+    "prompts": "^2.4.2",
     "yaml": "^2.8.2"
   },
   "devDependencies": {

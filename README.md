@@ -16,10 +16,10 @@ Interactive command-line interface for querying Atlassian Forge SQL databases vi
 ### In Your Forge Project
 
 ```sh
-npm install -D forge-fsql
+npm install -g forge-fsql
 
-# add webtrigger to manifest.yml and a wrapper module for the corresponding function
-node_modules/.bin/fsql-setup
+# adds webtrigger to manifest.yml and a wrapper module for the corresponding function
+fsql-setup
 
 # deploy with the webtrigger
 forge deploy
