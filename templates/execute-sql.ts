@@ -1,9 +1,19 @@
+import { getAppContext } from "@forge/api";
 import { sql } from "@forge/sql";
 
 const executeSql = async (req: {
   body: string;
 }): Promise<ReturnType<typeof getHttpResponse>> => {
   console.log("\n=== Executing Custom SQL Query ===");
+
+  if (getAppContext()?.environmentType === `PRODUCTION`) {
+    const errorMsg = `executeSql is disabled in PRODUCTION for security.`;
+    console.log(errorMsg);
+    return getHttpResponse(403, {
+      success: false,
+      error: errorMsg,
+    });
+  }
 
   const payload = req.body;
   let sqlRequest: { query?: string } | null = null;
@@ -59,6 +69,7 @@ function getHttpResponse(
   const statusTexts: Record<number, string> = {
     200: "OK",
     400: "Bad Request",
+    403: "Forbidden",
     404: "Not Found",
     500: "Internal Server Error",
   };

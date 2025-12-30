@@ -73,7 +73,10 @@ export class ForgeClient {
 
   async testConnection(): Promise<boolean> {
     try {
-      const result = await this.execute("SELECT 1 as test");
+      const result: SqlResult = await this.execute("SELECT 1 as test");
+      if (result.error) {
+        console.error(`Connection test failed: ${result.error}`);
+      }
       return !result.error;
     } catch {
       return false;

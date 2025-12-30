@@ -1,6 +1,6 @@
 {
   "name": "forge-fsql",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "description": "Interactive SQL CLI for Atlassian Forge SQL via web triggers",
   "main": "dist/cjs/index.js",
@@ -29,7 +29,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
+    "build": "ts-node scripts/build-templates.ts && tsc && tsc -p tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
     "fsql": "node ./bin/fsql.js",
@@ -57,6 +57,7 @@
   "author": "Chris Hatch",
   "license": "MIT",
   "dependencies": {
+    "@forge/api": "^6.4.2",
     "@forge/sql": "^3.0.14",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.3",

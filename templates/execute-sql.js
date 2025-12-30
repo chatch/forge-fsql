@@ -1,29 +1,31 @@
+import { getAppContext } from "@forge/api";
 import { sql } from "@forge/sql";
-
 const executeSql = async (req) => {
   console.log("\n=== Executing Custom SQL Query ===");
-
+  if (getAppContext()?.environmentType === `PRODUCTION`) {
+    const errorMsg = `executeSql is disabled in PRODUCTION for security.`;
+    console.log(errorMsg);
+    return getHttpResponse(403, {
+      success: false,
+      error: errorMsg,
+    });
+  }
   const payload = req.body;
   let sqlRequest = null;
   let query;
-
   try {
     sqlRequest = JSON.parse(payload);
     query = sqlRequest?.query;
-
     if (!query) {
       return getHttpResponse(400, {
         success: false,
         error: "No SQL query provided",
       });
     }
-
     console.log("Executing query:", query);
-
+    // Import sql directly for custom queries
     const result = await sql.executeRaw(query);
-
     console.log("Query result:", result);
-
     return getHttpResponse(200, {
       success: true,
       rows: result.rows || [],
@@ -33,9 +35,7 @@ const executeSql = async (req) => {
   } catch (error) {
     console.error(error);
     console.error("Error while executing sql", { error });
-
     const errorMessage = error instanceof Error ? error.message : String(error);
-
     return getHttpResponse(500, {
       success: false,
       error: errorMessage,
@@ -43,16 +43,15 @@ const executeSql = async (req) => {
     });
   }
 };
-
 function getHttpResponse(statusCode, body) {
   const statusTexts = {
     200: "OK",
     400: "Bad Request",
+    403: "Forbidden",
     404: "Not Found",
     500: "Internal Server Error",
   };
   const statusText = statusTexts[statusCode] || "Bad Request";
-
   return {
     headers: { "Content-Type": ["application/json"] },
     statusCode,
@@ -60,5 +59,4 @@ function getHttpResponse(statusCode, body) {
     body: JSON.stringify(body),
   };
 }
-
 export { executeSql };

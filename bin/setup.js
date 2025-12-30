@@ -122,8 +122,14 @@ async function main() {
     "utf8",
   );
 
+  const fileExists = fs.existsSync(fsqlAbsPath);
   fs.writeFileSync(fsqlAbsPath, fsqlContent);
-  spinner.succeed(`Created ${fsqlRelPath}`);
+
+  if (fileExists) {
+    spinner.succeed(`Updated ${fsqlRelPath}`);
+  } else {
+    spinner.succeed(`Created ${fsqlRelPath}`);
+  }
 
   // 3. Update manifest
   spinner.start("Updating manifest.yml...");
