@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+set -e
+
+# Build templates from TypeScript source
+ts-node scripts/build-templates.ts
+
+# Format generated files
+pnpm fixstyle
+
+# Compile TypeScript (ESM)
+tsc
+
+# Compile TypeScript (CommonJS)
+tsc -p tsconfig.cjs.json
+echo '{"type": "commonjs"}' > dist/cjs/package.json

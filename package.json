@@ -29,7 +29,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "ts-node scripts/build-templates.ts && tsc && tsc -p tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
+    "build": "sh bin/build",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
     "fsql": "node ./bin/fsql.js",
