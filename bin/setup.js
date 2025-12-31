@@ -23,7 +23,26 @@ const projectRoot = process.cwd();
 async function main() {
   console.log(chalk.bold.blue("\n🚀 Forge SQL CLI Setup\n"));
 
-  // Detect consumer project type
+  const { isEsm, isTypeScript } = checkDependencies();
+  const manifestPath = getManifestPath();
+
+  const fsqlRelPath = await createExecutionFunction(isTypeScript, isEsm);
+  if (!fsqlRelPath) return;
+
+  updateManifestFile(manifestPath, fsqlRelPath);
+
+  const deployed = await deployForgeApp();
+  if (!deployed) return;
+
+  const url = await setupWebTrigger();
+  if (url) {
+    updateEnv(url);
+  }
+
+  finish();
+}
+
+function checkDependencies() {
   let isEsm = false;
   let isTypeScript = fs.existsSync(path.join(projectRoot, "tsconfig.json"));
 
@@ -65,8 +84,10 @@ async function main() {
   } catch (error) {
     console.error(chalk.yellow("Warning: Could not read package.json:"), error);
   }
+  return { isEsm, isTypeScript };
+}
 
-  // 1. Detect manifest.yaml or manifest.yml
+function getManifestPath() {
   let manifestPath = path.join(projectRoot, "manifest.yml");
   if (!fs.existsSync(manifestPath)) {
     manifestPath = path.join(projectRoot, "manifest.yaml");
@@ -80,8 +101,10 @@ async function main() {
     );
     process.exit(1);
   }
+  return manifestPath;
+}
 
-  // 2. Prompt for fsql execution function path
+async function createExecutionFunction(isTypeScript, isEsm) {
   const extension = isTypeScript ? "ts" : isEsm ? "js" : "js";
   const defaultPath = `src/fsql.${extension}`;
 
@@ -94,14 +117,13 @@ async function main() {
 
   if (!response.fsqlPath) {
     console.log(chalk.yellow("Setup cancelled."));
-    process.exit(0);
+    return null;
   }
 
   const fsqlRelPath = response.fsqlPath;
   const fsqlAbsPath = path.resolve(projectRoot, fsqlRelPath);
   const srcSameDir = path.dirname(fsqlAbsPath);
 
-  // Spinner for file creation
   const spinner = ora("Creating function file...").start();
 
   if (!fs.existsSync(srcSameDir)) {
@@ -131,69 +153,80 @@ async function main() {
     spinner.succeed(`Created ${fsqlRelPath}`);
   }
 
-  // 3. Update manifest
-  spinner.start("Updating manifest.yml...");
+  return fsqlRelPath;
+}
 
-  let doc;
+function updateManifestFile(manifestPath, fsqlRelPath) {
+  const spinner = ora("Updating manifest.yml...").start();
+
   try {
-    const fileContents = fs.readFileSync(manifestPath, "utf8");
-    doc = YAML.parseDocument(fileContents);
+    const doc = readManifest(manifestPath);
+    ensureModulesStructure(doc);
+
+    const modules = doc.get("modules");
+
+    // 1. Determine the handler name (e.g. index.executeSql)
+    const handlerName = resolveHandlerName(doc, fsqlRelPath);
+
+    // 2. Add or update the function definition
+    const functionKey = "executeSql";
+    upsertFunction(doc, modules, functionKey, handlerName);
+
+    // 3. Add or update the webtrigger definition
+    const webtriggerKey = "execute-sql";
+    upsertWebTrigger(doc, modules, webtriggerKey, functionKey);
+
+    // 4. Save
+    writeManifest(manifestPath, doc);
+    spinner.succeed("Updated manifest file");
   } catch (e) {
-    spinner.fail("Error reading manifest");
+    spinner.fail("Error updating manifest");
     console.error(e);
     process.exit(1);
   }
+}
 
+function readManifest(manifestPath) {
+  try {
+    const fileContents = fs.readFileSync(manifestPath, "utf8");
+    return YAML.parseDocument(fileContents);
+  } catch (e) {
+    throw new Error(`Error reading manifest: ${e.message}`);
+  }
+}
+
+function ensureModulesStructure(doc) {
   if (!doc.contents) {
     doc.contents = doc.createNode({});
   }
-
   if (!doc.has("modules")) {
     doc.set("modules", doc.createNode({}));
   }
+}
 
-  const modules = doc.get("modules");
-
-  const functionKey = "executeSql";
-  if (!modules.has("function")) {
-    modules.set("function", doc.createNode([]));
-  }
-
-  let functions = modules.get("function");
-
-  if (!YAML.isSeq(functions)) {
-    const obj = functions.toJSON();
-    functions = doc.createNode(
-      Object.entries(obj).map(([key, val]) => ({ key, ...val })),
-    );
-    modules.set("function", functions);
-  }
-
-  // Determine handler path
-  // Standard Forge pattern: filename without extension + .functionName
-  // We need to be careful with paths.
-  // If user chooses src/foo/bar.ts, handler is src/foo/bar.executeSql
-  // If user chooses modules/bar.js, handler is modules/bar.executeSql
-
-  // 145. Determine handler path
+function resolveHandlerName(doc, fsqlRelPath) {
   let handlerPath = fsqlRelPath.replace(/\.(ts|js|cjs|mjs)$/, "");
-  // Ensure we use forward slashes for handler paths
   handlerPath = handlerPath.split(path.sep).join("/");
 
-  // Logic to detect if we should strip 'src/' from the handler path
-  // This happens if the project uses 'src' as the root for handlers (common in Forge)
-  // We check if 'src/index.ts' exists but 'index.ts' does not, AND if there is a handler 'index.handler'
-  // Or simply, if the user created the file in 'src/' but 'src/' path is redundant for handlers.
+  const modules = doc.get("modules");
+  let functions = modules.get("function"); // might be null/undefined
 
-  // Heuristic: Check existing function handlers
+  // Logic to detect if we should strip 'src/' from the handler path
   let srcIsRoot = false;
+
+  // normalize functions list to check existing handlers
+  let items = [];
+  if (functions && YAML.isSeq(functions)) {
+    items = functions.items;
+  }
+
   try {
-    if (functions && functions.items && functions.items.length > 0) {
-      for (const f of functions.items) {
+    if (items.length > 0) {
+      for (const f of items) {
         const fJson = f.toJSON();
         if (fJson && fJson.handler) {
-          const h = fJson.handler.split(".")[0]; // e.g. "index" or "consumers/ingestion-consumer"
-          const possibleSrcPath = path.join(projectRoot, "src", h + ".ts"); // simple check for .ts
+          const h = fJson.handler.split(".")[0];
+          const possibleSrcPath = path.join(projectRoot, "src", h + ".ts");
           const possibleRootPath = path.join(projectRoot, h + ".ts");
 
           if (
@@ -206,7 +239,6 @@ async function main() {
         }
       }
     } else {
-      // Fallback: if index.ts is in src but not root
       if (
         fs.existsSync(path.join(projectRoot, "src", "index.ts")) &&
         !fs.existsSync(path.join(projectRoot, "index.ts"))
@@ -219,20 +251,37 @@ async function main() {
   }
 
   if (srcIsRoot && handlerPath.startsWith("src/")) {
-    handlerPath = handlerPath.substring(4); // remove "src/"
+    handlerPath = handlerPath.substring(4);
   }
 
-  const handlerName = `${handlerPath}.executeSql`;
+  return `${handlerPath}.executeSql`;
+}
+
+function upsertFunction(doc, modules, key, handlerName) {
+  if (!modules.has("function")) {
+    modules.set("function", doc.createNode([]));
+  }
+
+  let functions = modules.get("function");
+
+  // Fix if it's not a sequence (e.g. some malformed yaml or object)
+  if (!YAML.isSeq(functions)) {
+    const obj = functions.toJSON();
+    functions = doc.createNode(
+      Object.entries(obj).map(([k, v]) => ({ key: k, ...v })),
+    );
+    modules.set("function", functions);
+  }
 
   let functionExists = functions.items.find((f) => {
     const js = f.toJSON();
-    return js && js.key === functionKey;
+    return js && js.key === key;
   });
 
   if (!functionExists) {
     functions.add(
       doc.createNode({
-        key: functionKey,
+        key: key,
         handler: handlerName,
       }),
     );
@@ -241,36 +290,35 @@ async function main() {
       functionExists.set("handler", handlerName);
     } else {
       const idx = functions.items.indexOf(functionExists);
-      functions.set(
-        idx,
-        doc.createNode({ key: functionKey, handler: handlerName }),
-      );
+      functions.set(idx, doc.createNode({ key: key, handler: handlerName }));
     }
   }
+}
 
-  const webtriggerKey = "execute-sql";
+function upsertWebTrigger(doc, modules, triggerKey, functionKey) {
   if (!modules.has("webtrigger")) {
     modules.set("webtrigger", doc.createNode([]));
   }
 
   let webtriggers = modules.get("webtrigger");
+
   if (!YAML.isSeq(webtriggers)) {
     const obj = webtriggers.toJSON();
     webtriggers = doc.createNode(
-      Object.entries(obj).map(([key, val]) => ({ key, ...val })),
+      Object.entries(obj).map(([k, v]) => ({ key: k, ...v })),
     );
     modules.set("webtrigger", webtriggers);
   }
 
   let webtriggerExists = webtriggers.items.find((w) => {
     const js = w.toJSON();
-    return js && js.key === webtriggerKey;
+    return js && js.key === triggerKey;
   });
 
   if (!webtriggerExists) {
     webtriggers.add(
       doc.createNode({
-        key: webtriggerKey,
+        key: triggerKey,
         function: functionKey,
       }),
     );
@@ -281,22 +329,18 @@ async function main() {
       const idx = webtriggers.items.indexOf(webtriggerExists);
       webtriggers.set(
         idx,
-        doc.createNode({ key: webtriggerKey, function: functionKey }),
+        doc.createNode({ key: triggerKey, function: functionKey }),
       );
     }
   }
+}
 
-  try {
-    fs.writeFileSync(manifestPath, doc.toString());
-    spinner.succeed("Updated manifest file");
-  } catch (e) {
-    spinner.fail("Error writing manifest");
-    console.error(e);
-    process.exit(1);
-  }
+function writeManifest(manifestPath, doc) {
+  fs.writeFileSync(manifestPath, doc.toString());
+}
 
-  // 4. Prompt for deployment
-  console.log(); // Add newline for better UX
+async function deployForgeApp() {
+  console.log();
   const deployResponse = await prompts({
     type: "text",
     name: "cmd",
@@ -307,7 +351,7 @@ async function main() {
 
   if (!deployResponse.cmd) {
     console.log(chalk.yellow("Deployment cancelled."));
-    process.exit(0);
+    return false;
   }
 
   const deployCmd = deployResponse.cmd;
@@ -328,11 +372,12 @@ async function main() {
       resolve();
     });
   });
+  return true;
+}
 
-  // 5. Run forge webtrigger create
+async function setupWebTrigger() {
   let webtriggerArgs = ["webtrigger", "create", "--functionKey", "execute-sql"];
 
-  // Try to detect existing installation
   try {
     const listProc = spawn("forge", ["install", "list", "--json"], {
       shell: true,
@@ -343,7 +388,6 @@ async function main() {
       listProc.on("close", resolve);
     });
 
-    // Attempt to extract JSON
     const jsonStart = listOutput.indexOf("[");
     const jsonEnd = listOutput.lastIndexOf("]");
     if (jsonStart !== -1 && jsonEnd !== -1) {
@@ -370,7 +414,7 @@ async function main() {
       }
     }
   } catch {
-    // Ignore errors in auto-detection
+    // Ignore
   }
 
   console.log(
@@ -384,39 +428,47 @@ async function main() {
   );
   console.log(separator);
 
-  const forgeCmd = spawn("forge", webtriggerArgs, {
-    stdio: ["inherit", "pipe", "inherit"],
-    shell: true,
-  });
+  return new Promise((resolve) => {
+    const forgeCmd = spawn("forge", webtriggerArgs, {
+      stdio: [
+        "inherit", // stdin
+        "pipe", // stdout
+        "pipe", // stderr
+      ],
+      shell: true,
+    });
 
-  let stdoutData = "";
+    let outputData = "";
 
-  forgeCmd.stdout.on("data", (data) => {
-    process.stdout.write(data);
-    stdoutData += data.toString();
-  });
+    const onData = (data, stream) => {
+      stream.write(data);
+      outputData += data.toString();
+    };
 
-  forgeCmd.on("close", (code) => {
-    console.log(separator);
+    forgeCmd.stdout.on("data", (d) => onData(d, process.stdout));
+    forgeCmd.stderr.on("data", (d) => onData(d, process.stderr));
 
-    if (code !== 0) {
-      console.log(
-        chalk.yellow(
-          `\nForge command exited with code ${code}. If you cancelled or it failed, you may need to run it manually.`,
-        ),
-      );
-    }
+    forgeCmd.on("close", (code) => {
+      console.log(separator);
 
-    // Capture URL
-    const urlRegex =
-      /https:\/\/[a-zA-Z0-9-.]+\.atlassian-dev\.net\/[a-zA-Z0-9/-]+/;
-    const matches = stdoutData.match(urlRegex);
+      const urlRegex =
+        /https:\/\/[a-zA-Z0-9-.]+\.atlassian(-dev)?\.net\/[a-zA-Z0-9/_.~%-]+/;
+      const matches = outputData.match(urlRegex);
 
-    if (matches) {
-      const url = matches[0];
-      console.log(chalk.green(`\nFound Webtrigger URL: ${url}`));
-      updateEnv(url);
-    } else {
+      if (matches) {
+        const url = matches[0];
+        console.log(chalk.green(`\nFound Webtrigger URL: ${url}`));
+        resolve(url);
+        return;
+      }
+
+      if (code !== 0) {
+        console.error(
+          chalk.red(`\n❌ Error: Forge command failed with exit code ${code}.`),
+        );
+        process.exit(code);
+      }
+
       console.log(
         chalk.yellow(
           "\nCould not automatically find Webtrigger URL in output.",
@@ -425,8 +477,8 @@ async function main() {
       console.log(
         "If created, please add the URL to your .env file as FORGE_SQL_WEBTRIGGER=<url>",
       );
-      finish();
-    }
+      resolve(null);
+    });
   });
 }
 
@@ -444,19 +496,15 @@ function updateEnv(url) {
     }
   }
 
-  // Check if already exists
-  if (envContent.includes("FORGE_SQL_WEBTRIGGER=")) {
-    envContent = envContent.replace(
-      /FORGE_SQL_WEBTRIGGER=.*(\n|$)/,
-      `${envVar}\n`,
-    );
+  const declRegex = /^FORGE_SQL_WEBTRIGGER=.*$/m;
+  if (declRegex.test(envContent)) {
+    envContent = envContent.replace(declRegex, envVar);
   } else {
     envContent += `${envVar}\n`;
   }
 
   fs.writeFileSync(envPath, envContent);
   spinner.succeed("Updated .env with Webtrigger URL");
-  finish();
 }
 
 function finish() {

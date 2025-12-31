@@ -152,8 +152,7 @@ export class ForgeSqlCli {
     console.log(chalk.gray("Type .help for commands, exit to quit"));
     console.log(chalk.gray("=".repeat(50)));
 
-    // Test connection
-    process.stdout.write("Testing connection... ");
+    process.stdout.write("Connecting ... ");
     const connected = await this.client.testConnection();
 
     if (connected) {
