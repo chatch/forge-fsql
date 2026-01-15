@@ -28,7 +28,7 @@ export class ForgeSqlCli {
     if (!url) {
       console.error(chalk.red("Error: FORGE_SQL_WEBTRIGGER not configured"));
       console.error(
-        chalk.yellow("Set it via environment variable or .env file"),
+        "Try rerunning 'fsql-setup'.\n\nSee the Installation docs at https://github.com/chatch/forge-fsql?tab=readme-ov-file#installation",
       );
       process.exit(1);
     }
