@@ -1,5 +1,7 @@
 # Forge FSQL CLI
 
+[![NPM Package](https://img.shields.io/npm/v/forge-fsql.svg?style=flat-square)](https://www.npmjs.org/package/forge-fsql)
+
 Interactive CLI for querying Atlassian Forge SQL databases via web triggers.
 
 ## Demo
