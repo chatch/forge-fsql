@@ -10,6 +10,16 @@ export interface Command {
 
 export const specialCommands: Command[] = [
   {
+    name: ".schema",
+    description: "Show database schema",
+    execute: async (client: ForgeClient) => {
+      const result = await client.execute(
+        "SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_schema = DATABASE() ORDER BY table_name, ordinal_position",
+      );
+      return ResultFormatter.formatResult(result);
+    },
+  },
+  {
     name: ".tables",
     description: "List all tables",
     execute: async (client: ForgeClient) => {
@@ -31,12 +41,28 @@ export const specialCommands: Command[] = [
     },
   },
   {
-    name: ".schema",
-    description: "Show database schema",
+    name: ".indexes",
+    description: "Show all indexes",
     execute: async (client: ForgeClient) => {
       const result = await client.execute(
-        "SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_schema = DATABASE() ORDER BY table_name, ordinal_position",
+        "SELECT TABLE_NAME, INDEX_NAME, COLUMN_NAME, SEQ_IN_INDEX, NON_UNIQUE FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() ORDER BY CASE WHEN TABLE_NAME = '__migrations' THEN 1 ELSE 0 END, TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX",
       );
+      return ResultFormatter.formatResult(result);
+    },
+  },
+  {
+    name: ".migrations",
+    description: "List all migrations",
+    execute: async (client: ForgeClient) => {
+      const result = await client.execute("SELECT * FROM __migrations");
+      return ResultFormatter.formatResult(result);
+    },
+  },
+  {
+    name: ".database",
+    description: "Show the database name",
+    execute: async (client: ForgeClient) => {
+      const result = await client.execute("SHOW DATABASES");
       return ResultFormatter.formatResult(result);
     },
   },
