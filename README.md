@@ -17,6 +17,27 @@ Interactive CLI for querying Atlassian Forge SQL databases via web triggers.
 - ⏱️ Query timing
 - 📝 Multi-line SQL support
 
+## Built in Commands
+
+```sh
+fsql> .help
+
+Special Commands:
+  .schema         Show database schema
+  .tables         List all tables
+  .describe       Describe a table (.describe table_name)
+  .indexes        Show all indexes
+  .migrations     List all migrations
+  .database       Show the database name
+  .help           Show available commands
+
+Other:
+  exit, quit      Exit the CLI
+  Ctrl+C          Cancel current query
+  Ctrl+D          Exit the CLI
+  ↑/↓             Navigate command history
+```
+
 ## Security
 
 - Disabled in Production - returns a 403 error if you attempt to call it
