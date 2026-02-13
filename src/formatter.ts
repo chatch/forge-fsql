@@ -54,12 +54,13 @@ export class ResultFormatter {
       return this.formatError(result.error);
     }
 
-    if (result.rows && result.rows.length > 0) {
+    if (result.rows) {
       return this.formatTable(result.rows);
     }
 
     if (result.affectedRows !== undefined) {
-      return this.formatSuccess(`${result.affectedRows} row(s) affected`);
+      const rowWord = result.affectedRows === 1 ? "row" : "rows";
+      return this.formatSuccess(`${result.affectedRows} ${rowWord} affected`);
     }
 
     return chalk.gray("Query executed successfully");

@@ -1,4 +1,4 @@
-name: Lint
+name: CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,3 +30,6 @@ jobs:
 
       - name: Run lint
         run: pnpm lint
+
+      - name: Run tests
+        run: pnpm vitest run

@@ -43,6 +43,9 @@
     "fixall": "pnpm fixstyle && pnpm fixsrc",
     "fixsrc": "eslint '**/*.{ts,tsx,js,jsx}' --ignore-pattern '**/eslint.config.js' --fix",
     "fixstyle": "prettier '**/*.{ts,tsx,js,jsx,json,md,yaml,yml}' --write",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui",
     "prepare": "husky",
     "prepublishOnly": "pnpm build"
   },
@@ -85,6 +88,7 @@
     "prettier": "^3.7.3",
     "ts-node": "^10.9.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0"
+    "typescript-eslint": "^8.48.0",
+    "vitest": "^4.0.18"
   }
 }
