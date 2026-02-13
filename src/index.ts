@@ -25,21 +25,14 @@ export class ForgeSqlCli {
   private multilineBuffer: string = "";
   private isMultiline: boolean = false;
   private skipSchemaLoad: boolean = false;
+  private url?: string;
 
   constructor(config: CliConfig) {
-    const url = config.url || process.env.FORGE_SQL_WEBTRIGGER;
+    this.url = config.url || process.env.FORGE_SQL_WEBTRIGGER;
     this.skipSchemaLoad = !!config.skipSchemaLoad;
 
-    if (!url) {
-      console.error(chalk.red("Error: FORGE_SQL_WEBTRIGGER not configured"));
-      console.error(
-        "Try rerunning 'fsql-setup'.\n\nSee the Installation docs at https://github.com/chatch/forge-fsql?tab=readme-ov-file#installation",
-      );
-      process.exit(1);
-    }
-
     this.client = new ForgeClient({
-      url,
+      url: this.url || "",
     });
 
     this.history = new History();
@@ -154,6 +147,14 @@ export class ForgeSqlCli {
   }
 
   async start(): Promise<void> {
+    if (!this.url) {
+      console.error(chalk.red("Error: FORGE_SQL_WEBTRIGGER not configured"));
+      console.error(
+        "Try rerunning 'fsql-setup'.\n\nSee the Installation docs at https://github.com/chatch/forge-fsql?tab=readme-ov-file#installation",
+      );
+      process.exit(1);
+    }
+
     console.log(chalk.bold.blue("Forge FSQL CLI"));
     console.log("");
     console.log("Type .help for commands, exit to quit");

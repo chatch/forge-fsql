@@ -44,8 +44,14 @@ const executeSql = async (req: {
       query,
     });
   } catch (error: unknown) {
-    console.error(error);
-    console.error("Error while executing sql", { error });
+    console.error("Error while executing sql:", error);
+    if (error instanceof Error && "context" in error) {
+      const ctx = (error as Error & { context?: { debug?: unknown } }).context;
+      console.error(
+        "Error context.debug:",
+        JSON.stringify(ctx?.debug, null, 2),
+      );
+    }
 
     const errorMessage = error instanceof Error ? error.message : String(error);
 

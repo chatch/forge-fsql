@@ -37,8 +37,11 @@ const executeSql = async (req) => {
         });
     }
     catch (error) {
-        console.error(error);
-        console.error("Error while executing sql", { error });
+        console.error("Error while executing sql:", error);
+        if (error instanceof Error && "context" in error) {
+            const ctx = error.context;
+            console.error("Error context.debug:", JSON.stringify(ctx?.debug, null, 2));
+        }
         const errorMessage = error instanceof Error ? error.message : String(error);
         return getHttpResponse(500, {
             success: false,
