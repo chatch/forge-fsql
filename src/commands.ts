@@ -1,5 +1,6 @@
 import { ForgeClient } from "./client.js";
 import { ResultFormatter } from "./formatter.js";
+import { loadSchema } from "./schema.js";
 import chalk from "chalk";
 
 export interface Command {
@@ -64,6 +65,19 @@ export const specialCommands: Command[] = [
     execute: async (client: ForgeClient) => {
       const result = await client.execute("SHOW DATABASES");
       return ResultFormatter.formatResult(result);
+    },
+  },
+  {
+    name: ".refreshSchema",
+    description: "Refresh auto-complete schema cache",
+    execute: async (client: ForgeClient) => {
+      try {
+        const timeMs = await loadSchema(client);
+        return chalk.green(`✓ Schema refreshed in ${timeMs}ms`);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return chalk.red(`✗ Failed to refresh schema: ${msg}`);
+      }
     },
   },
   {
