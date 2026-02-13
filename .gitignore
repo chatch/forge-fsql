@@ -2,3 +2,4 @@
 .*.swp
 dist/
 node_modules/
+fsql-dumps/

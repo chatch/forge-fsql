@@ -12,7 +12,8 @@
   "types": "dist/index.d.ts",
   "bin": {
     "fsql": "bin/fsql.js",
-    "fsql-setup": "bin/setup.js"
+    "fsql-setup": "bin/setup.js",
+    "fsql-export": "bin/fsql-export.js"
   },
   "exports": {
     ".": {

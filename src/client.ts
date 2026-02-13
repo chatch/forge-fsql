@@ -47,6 +47,13 @@ export class ForgeClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("text/html")) {
+          return {
+            error: `HTTP ${response.status} ${response.statusText}`,
+          };
+        }
+
         const errorText = await response.text();
         return {
           error: `HTTP ${response.status}: ${errorText}`,

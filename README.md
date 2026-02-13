@@ -66,6 +66,26 @@ Notes:
 fsql
 ```
 
+## Export
+
+Export your Forge SQL database schema and data to a local SQL file.
+
+```sh
+fsql-export
+```
+
+Options:
+
+- `--schema-only`: Export schema only (skip data)
+- `--output <file>`: Output file path (default: `./fsql-dumps/fsql-export-<timestamp>.sql`)
+- `--live-schema`: Fetch DDL from live database instead of `migration.ts`
+
+Notes:
+
+- uses `FORGE_SQL_WEBTRIGGER` from your `.env` file
+- exports schema and data to `./fsql-dumps/` by default
+- automatically looks for `migration.ts` to preserve your exact table definitions
+
 ## Upgrade
 
 ```sh
