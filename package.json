@@ -43,7 +43,7 @@
     "fixall": "pnpm fixstyle && pnpm fixsrc",
     "fixsrc": "eslint '**/*.{ts,tsx,js,jsx}' --ignore-pattern '**/eslint.config.js' --fix",
     "fixstyle": "prettier '**/*.{ts,tsx,js,jsx,json,md,yaml,yml}' --write",
-    "test": "vitest",
+    "test": "vitest run",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
     "prepare": "husky",
