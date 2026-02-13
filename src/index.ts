@@ -63,6 +63,10 @@ export class ForgeSqlCli {
       } else {
         console.log("\n" + chalk.gray("(Use .exit, exit, or Ctrl+D to quit)"));
       }
+
+      // Clear the current line buffer so the prompt is fresh
+      (this.rl as any).line = "";
+      (this.rl as any).cursor = 0;
       this.rl.prompt();
     });
   }
