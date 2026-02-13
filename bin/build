@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 set -e
 
+# Clean output directory
+rm -rf dist
+
 # Build templates from TypeScript source
 ts-node scripts/build-templates.ts
 
@@ -8,7 +11,7 @@ ts-node scripts/build-templates.ts
 pnpm fixstyle
 
 # Compile TypeScript (ESM)
-tsc
+tsc -p tsconfig.json
 
 # Compile TypeScript (CommonJS)
 tsc -p tsconfig.cjs.json
