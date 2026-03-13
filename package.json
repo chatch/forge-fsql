@@ -41,6 +41,7 @@
     "lint": "pnpm lint:eslint && pnpm lint:prettier",
     "lint:eslint": "eslint '**/*.{ts,tsx,js,jsx}' --ignore-pattern '**/eslint.config.js'",
     "lint:prettier": "prettier '**/*.{ts,tsx,js,jsx,json,md,yaml,yml}' --check || echo '⚠️  Warning: Prettier formatting issues found. Run \"pnpm fixstyle\" to fix them.'",
+    "typecheck": "tsc --noEmit",
     "fixall": "pnpm fixstyle && pnpm fixsrc",
     "fixsrc": "eslint '**/*.{ts,tsx,js,jsx}' --ignore-pattern '**/eslint.config.js' --fix",
     "fixstyle": "prettier '**/*.{ts,tsx,js,jsx,json,md,yaml,yml}' --write",

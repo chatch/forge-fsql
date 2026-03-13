@@ -6,6 +6,7 @@
 Interactive CLI for querying Atlassian Forge SQL databases via web triggers.
 
 Announcement and discussion on dev forum: [here](https://community.developer.atlassian.com/t/introducing-fsql-an-interactive-cli-for-querying-forge-sql-databases-via-web-triggers/98076)
+
 ## Demo
 
 ![demo](demo-usage.gif)
