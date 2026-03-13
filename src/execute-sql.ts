@@ -6,8 +6,11 @@ const executeSql = async (req: {
 }): Promise<ReturnType<typeof getHttpResponse>> => {
   console.log("\n=== Executing Custom SQL Query ===");
 
-  if (getAppContext()?.environmentType === `PRODUCTION`) {
-    const errorMsg = `executeSql is disabled in PRODUCTION for security.`;
+  const appContext = getAppContext();
+  if (!appContext || appContext.environmentType === `PRODUCTION`) {
+    const errorMsg = !appContext
+      ? `executeSql requires a valid Forge context.`
+      : `executeSql is disabled in PRODUCTION for security.`;
     console.log(errorMsg);
     return getHttpResponse(403, {
       success: false,
@@ -16,11 +19,10 @@ const executeSql = async (req: {
   }
 
   const payload = req.body;
-  let sqlRequest: { query?: string } | null = null;
   let query: string | undefined;
 
   try {
-    sqlRequest = JSON.parse(payload);
+    const sqlRequest: { query?: string } | null = JSON.parse(payload);
     query = sqlRequest?.query;
 
     if (!query) {
