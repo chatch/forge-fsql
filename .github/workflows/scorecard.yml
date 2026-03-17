@@ -1,0 +1,42 @@
+name: Scorecard
+
+on:
+  push:
+    branches: [main, master]
+  schedule:
+    - cron: "weekly"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scorecard:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Run Scorecard
+        uses: ossf/scorecard-action@v2.4.3
+        with:
+          results_file: results.sarif
+          results_format: sarif
+
+      - name: Upload results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          category: scorecard
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scorecard-results
+          path: results.sarif
