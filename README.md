@@ -2,6 +2,7 @@
 
 [![NPM Package](https://img.shields.io/npm/v/forge-fsql.svg?style=flat-square)](https://www.npmjs.org/package/forge-fsql)
 [![CI](https://github.com/chatch/forge-fsql/actions/workflows/ci.yml/badge.svg)](https://github.com/chatch/forge-fsql/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Eulo-Labs/forge-fsql/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Eulo-Labs/forge-fsql)
 
 Interactive CLI for querying Atlassian Forge SQL databases via web triggers.
 
